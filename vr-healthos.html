@@ -1,0 +1,2228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VR HealthOS — Clinic Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --bg-base: #060912;
+  --bg-surface: #0d1220;
+  --bg-card: #111827;
+  --bg-elevated: #1a2235;
+  --bg-input: #0d1220;
+  --accent: #00c9a7;
+  --accent-dim: rgba(0,201,167,0.12);
+  --accent-glow: rgba(0,201,167,0.3);
+  --accent2: #3b82f6;
+  --accent2-dim: rgba(59,130,246,0.12);
+  --danger: #ef4444;
+  --danger-dim: rgba(239,68,68,0.12);
+  --warning: #f59e0b;
+  --warning-dim: rgba(245,158,11,0.12);
+  --success: #10b981;
+  --success-dim: rgba(16,185,129,0.12);
+  --text-primary: #f0f4ff;
+  --text-secondary: #8896b0;
+  --text-muted: #4d5d7a;
+  --border: rgba(255,255,255,0.06);
+  --border-accent: rgba(0,201,167,0.25);
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --sidebar-w: 240px;
+  --font: 'Outfit', sans-serif;
+  --mono: 'DM Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 10px; }
+
+/* ─── LOGIN ─── */
+#login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-base);
+  position: relative;
+  overflow: hidden;
+}
+#login-screen::before {
+  content: '';
+  position: absolute;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(0,201,167,0.08) 0%, transparent 70%);
+  top: -100px; left: -100px;
+  pointer-events: none;
+}
+#login-screen::after {
+  content: '';
+  position: absolute;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%);
+  bottom: -100px; right: -100px;
+  pointer-events: none;
+}
+.login-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 48px;
+  width: 420px;
+  box-shadow: var(--shadow), 0 0 60px rgba(0,201,167,0.05);
+  position: relative;
+  z-index: 1;
+  animation: fadeUp 0.5s ease;
+}
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(20px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.login-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.login-logo-icon {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--accent), #00a88a);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+.login-logo-text { font-size: 22px; font-weight: 700; }
+.login-logo-text span { color: var(--accent); }
+.login-subtitle { color: var(--text-secondary); font-size: 14px; margin-bottom: 32px; }
+.form-group { margin-bottom: 18px; }
+.form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 14px;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+.form-select option { background: var(--bg-card); }
+.form-textarea { resize: vertical; min-height: 80px; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover { background: #00b896; transform: translateY(-1px); box-shadow: 0 4px 16px var(--accent-glow); }
+.btn-secondary {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: var(--bg-card); border-color: var(--accent); color: var(--accent); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: #dc2626; transform: translateY(-1px); }
+.btn-warning { background: var(--warning); color: #000; }
+.btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+.btn-full { width: 100%; justify-content: center; }
+.btn-icon { width: 32px; height: 32px; padding: 0; justify-content: center; border-radius: 6px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+/* ─── APP SHELL ─── */
+#app { display: none; min-height: 100vh; }
+.layout { display: flex; min-height: 100vh; }
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0;
+  height: 100vh;
+  z-index: 100;
+  transition: transform 0.3s;
+}
+.sidebar-logo {
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent), #00a88a);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.logo-text { font-size: 16px; font-weight: 700; }
+.logo-text span { color: var(--accent); }
+.sidebar-user {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.user-avatar {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  background: var(--accent-dim);
+  border: 1px solid var(--border-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-role { font-size: 11px; color: var(--text-secondary); }
+.sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 8px 20px 4px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 0;
+  transition: all 0.15s;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  position: relative;
+  margin: 1px 8px;
+  border-radius: 8px;
+}
+.nav-item:hover { background: var(--bg-elevated); color: var(--text-primary); }
+.nav-item.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-weight: 600;
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: -8px; top: 50%;
+  transform: translateY(-50%);
+  width: 3px; height: 20px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* ─── MAIN CONTENT ─── */
+.main-content {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.topbar {
+  height: 60px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.topbar-title { font-size: 18px; font-weight: 700; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; }
+.page-content { padding: 24px; flex: 1; }
+
+/* ─── VIEWS ─── */
+.view { display: none; }
+.view.active { display: block; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+/* ─── STATS GRID ─── */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  transition: border-color 0.2s;
+}
+.stat-card:hover { border-color: var(--accent); }
+.stat-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.stat-icon.teal { background: var(--accent-dim); }
+.stat-icon.blue { background: var(--accent2-dim); }
+.stat-icon.green { background: var(--success-dim); }
+.stat-icon.yellow { background: var(--warning-dim); }
+.stat-icon.red { background: var(--danger-dim); }
+.stat-value { font-size: 26px; font-weight: 700; line-height: 1; }
+.stat-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+.stat-change { font-size: 11px; margin-top: 4px; color: var(--success); }
+
+/* ─── CHARTS ─── */
+.charts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.chart-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.chart-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--text-secondary); }
+.chart-wrapper { position: relative; height: 200px; }
+
+/* ─── TABLES ─── */
+.table-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.table-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.table-title { font-size: 15px; font-weight: 600; }
+.table-filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.search-input {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 13px;
+  padding: 7px 12px;
+  outline: none;
+  min-width: 200px;
+  transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--accent); }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  background: var(--bg-elevated);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 10px 16px;
+  text-align: left;
+  white-space: nowrap;
+}
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg-elevated); }
+tbody td {
+  padding: 12px 16px;
+  font-size: 13px;
+  vertical-align: middle;
+}
+.td-mono { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+.td-link { color: var(--accent); cursor: pointer; font-weight: 600; }
+.td-link:hover { text-decoration: underline; }
+
+/* ─── BADGES ─── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.badge-success { background: var(--success-dim); color: var(--success); }
+.badge-warning { background: var(--warning-dim); color: var(--warning); }
+.badge-danger { background: var(--danger-dim); color: var(--danger); }
+.badge-info { background: var(--accent2-dim); color: var(--accent2); }
+.badge-teal { background: var(--accent-dim); color: var(--accent); }
+
+/* ─── MODALS ─── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+  transform: translateY(20px);
+  transition: transform 0.2s;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-lg { max-width: 720px; }
+.modal-xl { max-width: 900px; }
+.modal-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-title { font-size: 16px; font-weight: 700; }
+.modal-body { padding: 20px 24px; }
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.modal-close {
+  width: 30px; height: 30px;
+  border-radius: 6px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.15s;
+}
+.modal-close:hover { background: var(--danger-dim); color: var(--danger); }
+
+/* ─── FORM GRID ─── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid.col3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-span2 { grid-column: 1 / -1; }
+.form-row { display: flex; gap: 12px; align-items: flex-end; }
+
+/* ─── PATIENT PROFILE ─── */
+.profile-header {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.profile-avatar {
+  width: 64px; height: 64px;
+  background: var(--accent-dim);
+  border: 2px solid var(--border-accent);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.profile-name { font-size: 22px; font-weight: 700; }
+.profile-id { font-family: var(--mono); font-size: 13px; color: var(--accent); }
+.profile-meta { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; }
+.profile-meta-item { font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+.profile-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+  gap: 4px;
+}
+.profile-tab {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.profile-tab:hover { color: var(--text-primary); }
+.profile-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.profile-panel { display: none; }
+.profile-panel.active { display: block; animation: fadeIn 0.2s; }
+
+/* ─── CALENDAR ─── */
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.cal-day-name {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 6px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+.cal-cell {
+  min-height: 80px;
+  background: var(--bg-elevated);
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  overflow: hidden;
+}
+.cal-cell:hover { background: var(--bg-card); border: 1px solid var(--border-accent); }
+.cal-cell.today { border: 1px solid var(--accent); }
+.cal-cell.other-month { opacity: 0.35; }
+.cal-date { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.cal-event {
+  background: var(--accent-dim);
+  border-left: 2px solid var(--accent);
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-size: 10px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--accent);
+}
+
+/* ─── INVOICE ─── */
+.invoice-print {
+  background: #fff;
+  color: #111;
+  padding: 40px;
+  border-radius: 12px;
+  font-family: var(--font);
+  max-width: 680px;
+  margin: 0 auto;
+}
+.invoice-print h1 { font-size: 28px; color: #0a0e1a; }
+.invoice-print .inv-accent { color: #00c9a7; }
+.invoice-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
+.invoice-meta table { font-size: 13px; }
+.invoice-meta td { padding: 2px 8px; }
+.invoice-meta td:first-child { color: #666; font-weight: 500; }
+.invoice-divider { height: 2px; background: #f0f0f0; margin: 20px 0; }
+.invoice-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; }
+.invoice-table th { background: #f8f9fa; padding: 10px 12px; text-align: left; font-weight: 700; font-size: 11px; letter-spacing: 0.8px; text-transform: uppercase; }
+.invoice-table td { padding: 12px; border-bottom: 1px solid #eee; }
+.invoice-total { text-align: right; margin-top: 16px; }
+.invoice-total .total-row { display: flex; justify-content: flex-end; gap: 40px; margin-bottom: 6px; font-size: 14px; }
+.invoice-total .grand-total { font-size: 20px; font-weight: 700; color: #00c9a7; border-top: 2px solid #00c9a7; padding-top: 8px; margin-top: 8px; }
+.invoice-footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee; font-size: 12px; color: #888; text-align: center; }
+.status-stamp {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.stamp-paid { background: #d1fae5; color: #059669; border: 2px solid #059669; }
+.stamp-pending { background: #fef3c7; color: #d97706; border: 2px solid #d97706; }
+
+/* ─── TOAST ─── */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 280px;
+  box-shadow: var(--shadow);
+  animation: toastIn 0.3s ease;
+}
+@keyframes toastIn { from { transform:translateX(100px); opacity:0; } to { transform:none; opacity:1; } }
+.toast.success { border-left: 3px solid var(--success); }
+.toast.error { border-left: 3px solid var(--danger); }
+.toast.info { border-left: 3px solid var(--accent2); }
+
+/* ─── EMPTY STATE ─── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+.empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state-text { font-size: 14px; }
+
+/* ─── DOCS GRID ─── */
+.docs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.doc-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  text-align: center;
+  transition: border-color 0.2s;
+  cursor: pointer;
+}
+.doc-card:hover { border-color: var(--accent); }
+.doc-icon { font-size: 32px; margin-bottom: 8px; }
+.doc-name { font-size: 12px; font-weight: 600; word-break: break-word; }
+.doc-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+/* ─── TIMELINE LOG ─── */
+.log-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.log-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.log-time { font-size: 11px; color: var(--text-muted); font-family: var(--mono); white-space: nowrap; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.mobile-open { transform: translateX(0); }
+  .main-content { margin-left: 0; }
+  .form-grid { grid-template-columns: 1fr; }
+  .charts-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* Extra utility */
+.flex { display: flex; }
+.flex-1 { flex: 1; }
+.items-center { align-items: center; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.mb-4 { margin-bottom: 16px; }
+.mb-5 { margin-bottom: 20px; }
+.text-sm { font-size: 13px; }
+.text-xs { font-size: 11px; }
+.text-muted { color: var(--text-secondary); }
+.font-mono { font-family: var(--mono); }
+.text-accent { color: var(--accent); }
+.text-danger { color: var(--danger); }
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+.section-title { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
+.back-btn { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+.back-btn:hover { color: var(--accent); }
+.inline-tag { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 4px; font-size: 11px; padding: 2px 6px; font-family: var(--mono); }
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.loading { display: flex; align-items: center; justify-content: center; height: 100px; color: var(--text-muted); gap: 8px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ LOGIN ═══════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">🏥</div>
+      <div>
+        <div class="login-logo-text">VR Health<span>OS</span></div>
+        <div style="font-size:11px;color:var(--text-muted)">Clinic Management System</div>
+      </div>
+    </div>
+    <div class="login-subtitle">Sign in to access the dashboard</div>
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <input class="form-input" id="login-user" type="text" placeholder="Enter username" value="admin">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" id="login-pass" type="password" placeholder="Enter password" value="admin123">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Role</label>
+      <select class="form-select" id="login-role">
+        <option value="admin">Doctor (Admin)</option>
+        <option value="receptionist">Receptionist (Staff)</option>
+      </select>
+    </div>
+    <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:18px;font-size:12px;color:var(--text-muted)">
+      Demo: Admin — admin/admin123 &nbsp;|&nbsp; Staff — staff/staff123
+    </div>
+    <button class="btn btn-primary btn-full" onclick="doLogin()">Sign In →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ APP ═══════════════════════════ -->
+<div id="app">
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon">🏥</div>
+        <div class="logo-text">VR Health<span>OS</span></div>
+      </div>
+      <div class="sidebar-user">
+        <div class="user-avatar" id="user-avatar">A</div>
+        <div class="user-info">
+          <div class="user-name" id="user-name">Administrator</div>
+          <div class="user-role" id="user-role">Doctor · Admin</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <!-- Populated by JS -->
+      </nav>
+      <div class="sidebar-footer">
+        <button class="btn btn-secondary btn-full btn-sm" onclick="doLogout()">⇠ Sign Out</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title" id="page-title">Dashboard</div>
+        <div class="topbar-actions">
+          <div style="font-size:12px;color:var(--text-muted)" id="topbar-date"></div>
+        </div>
+      </div>
+      <div class="page-content" id="page-content">
+
+        <!-- ── DASHBOARD (Admin) ── -->
+        <div class="view" id="view-dashboard">
+          <div class="stats-grid" id="admin-stats-grid"></div>
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-title">📅 Appointment Trends (Last 7 Days)</div>
+              <div class="chart-wrapper"><canvas id="chartApptTrend"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">💰 Revenue Trends (Monthly)</div>
+              <div class="chart-wrapper"><canvas id="chartRevenue"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">🔵 Visit Type Distribution</div>
+              <div class="chart-wrapper"><canvas id="chartVisitType"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">📈 Patient Growth</div>
+              <div class="chart-wrapper"><canvas id="chartPatients"></canvas></div>
+            </div>
+          </div>
+          <div class="table-card">
+            <div class="table-header"><div class="table-title">Recent Appointments</div></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Patient</th><th>Date</th><th>Time</th><th>Visit</th><th>Total</th><th>Status</th></tr></thead>
+                <tbody id="recent-appointments-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── DASHBOARD (Receptionist) ── -->
+        <div class="view" id="view-dash-staff">
+          <div class="stats-grid" id="staff-stats-grid"></div>
+          <div class="table-card">
+            <div class="table-header"><div class="table-title">Today's Appointments</div></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Patient</th><th>Time</th><th>Visit</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="today-appointments-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── PATIENTS ── -->
+        <div class="view" id="view-patients">
+          <div class="table-card">
+            <div class="table-header">
+              <div class="table-title">Patient Registry</div>
+              <div class="table-filters">
+                <input class="search-input" id="patient-search" placeholder="🔍  Search name, phone, ID…" oninput="filterPatients()">
+                <button class="btn btn-primary btn-sm" onclick="openNewPatientModal()">+ New Patient</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Patient ID</th><th>Name</th><th>Phone</th><th>Age</th><th>Gender</th><th>Registered</th><th>Actions</th></tr></thead>
+                <tbody id="patients-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── PATIENT PROFILE ── -->
+        <div class="view" id="view-patient-profile">
+          <div class="back-btn" onclick="showView('patients')">← Back to Patients</div>
+          <div class="profile-header" id="profile-header"></div>
+          <div class="profile-tabs" id="profile-tabs">
+            <div class="profile-tab active" onclick="switchProfileTab('details',this)">Basic Details</div>
+            <div class="profile-tab" onclick="switchProfileTab('appts',this)">Appointments</div>
+            <div class="profile-tab" onclick="switchProfileTab('payments',this)">Payments</div>
+            <div class="profile-tab" onclick="switchProfileTab('docs',this)">Documents</div>
+          </div>
+          <div class="profile-panel active" id="panel-details"></div>
+          <div class="profile-panel" id="panel-appts"></div>
+          <div class="profile-panel" id="panel-payments"></div>
+          <div class="profile-panel" id="panel-docs"></div>
+        </div>
+
+        <!-- ── APPOINTMENTS ── -->
+        <div class="view" id="view-appointments">
+          <div class="table-card">
+            <div class="table-header">
+              <div class="table-title">Appointments</div>
+              <div class="table-filters">
+                <input class="search-input" id="appt-search" placeholder="🔍  Search patient…" oninput="filterAppointments()">
+                <select class="form-select" style="width:140px;padding:7px 12px;font-size:13px" id="appt-status-filter" onchange="filterAppointments()">
+                  <option value="">All Status</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Paid">Paid</option>
+                </select>
+                <button class="btn btn-primary btn-sm" onclick="openBookModal()">+ Book Appointment</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>ID</th><th>Patient</th><th>Date</th><th>Time</th><th>Visit</th><th>Total</th><th>Payment</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="appointments-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── CALENDAR ── -->
+        <div class="view" id="view-calendar">
+          <div class="table-card" style="padding:20px">
+            <div class="cal-header">
+              <button class="btn btn-secondary btn-sm" onclick="calNav(-1)">‹ Prev</button>
+              <div style="font-size:16px;font-weight:700" id="cal-month-label"></div>
+              <button class="btn btn-secondary btn-sm" onclick="calNav(1)">Next ›</button>
+            </div>
+            <div class="cal-grid" id="cal-grid">
+              <div class="cal-day-name">Sun</div>
+              <div class="cal-day-name">Mon</div>
+              <div class="cal-day-name">Tue</div>
+              <div class="cal-day-name">Wed</div>
+              <div class="cal-day-name">Thu</div>
+              <div class="cal-day-name">Fri</div>
+              <div class="cal-day-name">Sat</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── BILLING ── -->
+        <div class="view" id="view-billing">
+          <div class="table-card">
+            <div class="table-header">
+              <div class="table-title">Billing &amp; Invoices</div>
+              <div class="table-filters">
+                <select class="form-select" style="width:130px;padding:7px 12px;font-size:13px" id="billing-filter" onchange="filterBilling()">
+                  <option value="all">All</option>
+                  <option value="today">Today</option>
+                  <option value="pending">Pending</option>
+                  <option value="paid">Paid</option>
+                </select>
+                <input class="search-input" id="billing-search" placeholder="🔍  Patient / Invoice…" oninput="filterBilling()" style="min-width:160px">
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Invoice ID</th><th>Patient</th><th>Date</th><th>Visit</th><th>Base</th><th>Extra</th><th>Total</th><th>Method</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="billing-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── STAFF (Admin) ── -->
+        <div class="view" id="view-staff">
+          <div class="table-card">
+            <div class="table-header">
+              <div class="table-title">Staff Management</div>
+              <button class="btn btn-primary btn-sm" onclick="openAddStaffModal()">+ Add Staff</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>ID</th><th>Name</th><th>Username</th><th>Role</th><th>Created</th><th>Actions</th></tr></thead>
+                <tbody id="staff-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── LOGS (Admin) ── -->
+        <div class="view" id="view-logs">
+          <div class="table-card">
+            <div class="table-header">
+              <div class="table-title">System Logs</div>
+              <input class="search-input" id="log-search" placeholder="🔍  Search logs…" oninput="filterLogs()">
+            </div>
+            <div class="table-wrap" style="max-height:600px;overflow-y:auto">
+              <table>
+                <thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Record Type</th><th>Record ID</th></tr></thead>
+                <tbody id="logs-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /page-content -->
+    </div><!-- /main-content -->
+  </div><!-- /layout -->
+</div><!-- /app -->
+
+<!-- ═══════════════ MODALS ═══════════════ -->
+
+<!-- New Patient Modal -->
+<div class="modal-overlay" id="modal-patient">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">New Patient</div>
+      <div class="modal-close" onclick="closeModal('modal-patient')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group form-span2">
+          <label class="form-label">Phone Number *</label>
+          <div style="display:flex;gap:8px">
+            <input class="form-input" id="np-phone" placeholder="Search existing…" style="flex:1">
+            <button class="btn btn-secondary btn-sm" onclick="checkPatientPhone()">Check</button>
+          </div>
+        </div>
+        <div class="form-group form-span2">
+          <label class="form-label">Full Name *</label>
+          <input class="form-input" id="np-name" placeholder="Patient full name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Age</label>
+          <input class="form-input" id="np-age" type="number" placeholder="Years">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Gender</label>
+          <select class="form-select" id="np-gender">
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group form-span2">
+          <label class="form-label">Address</label>
+          <input class="form-input" id="np-address" placeholder="Full address">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-patient')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePatient()">Save Patient</button>
+    </div>
+  </div>
+</div>
+
+<!-- Book Appointment Modal -->
+<div class="modal-overlay" id="modal-book">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title" id="book-modal-title">Book Appointment</div>
+      <div class="modal-close" onclick="closeModal('modal-book')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group form-span2">
+          <label class="form-label">Patient *</label>
+          <div style="position:relative">
+            <input class="form-input" id="appt-patient-search" placeholder="Search by name, phone, ID…" oninput="searchPatientsForAppt()" autocomplete="off">
+            <div id="appt-patient-dropdown" style="position:absolute;top:100%;left:0;right:0;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;z-index:50;max-height:180px;overflow-y:auto;display:none"></div>
+          </div>
+          <input type="hidden" id="appt-patient-id">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date *</label>
+          <input class="form-input" id="appt-date" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Time Slot *</label>
+          <select class="form-select" id="appt-time">
+            <option>08:00 AM</option><option>08:30 AM</option>
+            <option>09:00 AM</option><option>09:30 AM</option>
+            <option>10:00 AM</option><option>10:30 AM</option>
+            <option>11:00 AM</option><option>11:30 AM</option>
+            <option>12:00 PM</option><option>12:30 PM</option>
+            <option>01:00 PM</option><option>01:30 PM</option>
+            <option>02:00 PM</option><option>02:30 PM</option>
+            <option>03:00 PM</option><option>03:30 PM</option>
+            <option>04:00 PM</option><option>04:30 PM</option>
+            <option>05:00 PM</option><option>05:30 PM</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Visit Type</label>
+          <select class="form-select" id="appt-visit">
+            <option value="Old Case" selected>Old Case</option>
+            <option value="New Case">New Case</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Base Cost (₹)</label>
+          <input class="form-input" id="appt-base-cost" type="number" placeholder="500" value="500">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Extra Cost Included?</label>
+          <select class="form-select" id="appt-extra-toggle" onchange="toggleExtraCost()">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+        <div class="form-group" id="extra-cost-field" style="display:none">
+          <label class="form-label">Extra Cost Amount (₹)</label>
+          <input class="form-input" id="appt-extra-cost" type="number" placeholder="0" value="0" oninput="updateApptTotal()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <select class="form-select" id="appt-payment-method">
+            <option value="">Not Set</option>
+            <option value="Cash">Cash</option>
+            <option value="Online">Online</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mark as Paid?</label>
+          <select class="form-select" id="appt-paid-status">
+            <option value="Pending">Pending</option>
+            <option value="Paid">Paid</option>
+          </select>
+        </div>
+        <div class="form-group form-span2">
+          <label class="form-label">Notes</label>
+          <textarea class="form-textarea" id="appt-notes" placeholder="Optional notes…"></textarea>
+        </div>
+      </div>
+      <div style="background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:8px;padding:12px 16px;font-size:14px;margin-top:4px">
+        Total: <strong id="appt-total-display">₹500</strong>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-book')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAppointment()" id="save-appt-btn">Book Appointment</button>
+    </div>
+  </div>
+</div>
+
+<!-- View/Pay Invoice Modal -->
+<div class="modal-overlay" id="modal-invoice">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <div class="modal-title">Invoice</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-secondary btn-sm" onclick="downloadInvoice()">⬇ Download PDF</button>
+        <div class="modal-close" onclick="closeModal('modal-invoice')">✕</div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div id="invoice-content"></div>
+      <div id="invoice-pay-section" style="margin-top:20px;padding:16px;background:var(--bg-elevated);border-radius:8px;border:1px solid var(--border);display:none">
+        <div class="section-title">Mark as Paid</div>
+        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+          <div class="form-group" style="margin:0;flex:1;min-width:150px">
+            <label class="form-label">Payment Method</label>
+            <select class="form-select" id="pay-method-select">
+              <option value="Cash">Cash</option>
+              <option value="Online">Online</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="markInvoicePaid()">✓ Confirm Payment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Document Modal -->
+<div class="modal-overlay" id="modal-upload-doc">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Upload Document</div>
+      <div class="modal-close" onclick="closeModal('modal-upload-doc')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Document Type</label>
+        <select class="form-select" id="doc-type">
+          <option>Prescription Scan</option>
+          <option>Lab Report</option>
+          <option>Medical Record</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Document Name</label>
+        <input class="form-input" id="doc-name" placeholder="e.g. Blood Test Report">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Select File</label>
+        <input class="form-input" id="doc-file" type="file" accept=".pdf,.jpg,.jpeg,.png" style="padding:8px">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-upload-doc')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveDocument()">Upload</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Staff Modal -->
+<div class="modal-overlay" id="modal-staff">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Staff Member</div>
+      <div class="modal-close" onclick="closeModal('modal-staff')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group form-span2">
+          <label class="form-label">Full Name</label>
+          <input class="form-input" id="staff-name" placeholder="Staff full name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input class="form-input" id="staff-username" placeholder="Login username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" id="staff-password" type="password" placeholder="Password">
+        </div>
+        <div class="form-group form-span2">
+          <label class="form-label">Role</label>
+          <select class="form-select" id="staff-role">
+            <option value="receptionist">Receptionist (Staff)</option>
+            <option value="admin">Doctor (Admin)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-staff')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStaff()">Add Staff</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">Confirm Action</div>
+      <div class="modal-close" onclick="closeModal('modal-confirm')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div id="confirm-message" style="color:var(--text-secondary);font-size:14px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-confirm')">Cancel</button>
+      <button class="btn btn-danger" id="confirm-action-btn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<!-- ═════════════════════ SCRIPT ═════════════════════ -->
+<script>
+// ──────────────────────────────────────────
+// DB (localStorage)
+// ──────────────────────────────────────────
+const DB = {
+  get: (k) => { try { return JSON.parse(localStorage.getItem('vr_'+k)) || []; } catch(e){ return []; } },
+  set: (k,v) => localStorage.setItem('vr_'+k, JSON.stringify(v)),
+  getObj: (k) => { try { return JSON.parse(localStorage.getItem('vr_'+k)) || {}; } catch(e){ return {}; } },
+  setObj: (k,v) => localStorage.setItem('vr_'+k, JSON.stringify(v))
+};
+
+// ──────────────────────────────────────────
+// STATE
+// ──────────────────────────────────────────
+let currentUser = null;
+let currentPatientId = null;
+let currentInvoiceId = null;
+let editingApptId = null;
+let calDate = new Date();
+let charts = {};
+
+// ──────────────────────────────────────────
+// SEED DATA
+// ──────────────────────────────────────────
+function seedData() {
+  if (DB.get('seeded').length) return;
+  // Users
+  DB.set('users', [
+    {id:'U001',name:'Dr. Vikram Raj',username:'admin',password:'admin123',role:'admin',created:today()},
+    {id:'U002',name:'Receptionist Priya',username:'staff',password:'staff123',role:'receptionist',created:today()}
+  ]);
+  // Patients
+  const patients = [
+    {id:'VRP-00001',name:'Arjun Sharma',phone:'9876543210',address:'12, MG Road, Mumbai',age:'34',gender:'Male',created:'2024-11-01'},
+    {id:'VRP-00002',name:'Sneha Patel',phone:'9123456789',address:'45 Lake View, Pune',age:'28',gender:'Female',created:'2024-11-15'},
+    {id:'VRP-00003',name:'Ravi Kumar',phone:'9988776655',address:'78 Hill St, Bangalore',age:'52',gender:'Male',created:'2024-12-03'},
+    {id:'VRP-00004',name:'Meena Joshi',phone:'9654321087',address:'23 Park Ave, Ahmedabad',age:'41',gender:'Female',created:'2024-12-20'},
+  ];
+  DB.set('patients', patients);
+  // Appointments
+  const now = today();
+  const appts = [
+    {id:'APT-0001',patientId:'VRP-00001',date:'2025-01-10',time:'10:00 AM',visitType:'New Case',baseCost:600,extraCostIncluded:'No',extraCost:0,totalCost:600,paymentMethod:'Cash',paymentStatus:'Paid',notes:'Regular checkup',created:'2025-01-10'},
+    {id:'APT-0002',patientId:'VRP-00002',date:'2025-01-15',time:'11:00 AM',visitType:'Old Case',baseCost:400,extraCostIncluded:'Yes',extraCost:150,totalCost:550,paymentMethod:'Online',paymentStatus:'Paid',notes:'Follow-up',created:'2025-01-15'},
+    {id:'APT-0003',patientId:'VRP-00003',date:'2025-02-05',time:'09:00 AM',visitType:'New Case',baseCost:700,extraCostIncluded:'No',extraCost:0,totalCost:700,paymentMethod:'Cash',paymentStatus:'Paid',notes:'',created:'2025-02-05'},
+    {id:'APT-0004',patientId:'VRP-00001',date:now,time:'02:00 PM',visitType:'Old Case',baseCost:400,extraCostIncluded:'No',extraCost:0,totalCost:400,paymentMethod:'',paymentStatus:'Pending',notes:'',created:now},
+    {id:'APT-0005',patientId:'VRP-00004',date:now,time:'03:30 PM',visitType:'New Case',baseCost:600,extraCostIncluded:'Yes',extraCost:200,totalCost:800,paymentMethod:'Cash',paymentStatus:'Paid',notes:'',created:now},
+  ];
+  DB.set('appointments', appts);
+  // Invoices (match appointments)
+  const invoices = appts.map((a,i)=>({
+    id:`INV-${String(i+1).padStart(4,'0')}`,
+    appointmentId: a.id,
+    patientId: a.patientId,
+    date: a.date,
+    visitType: a.visitType,
+    baseCost: a.baseCost,
+    extraCost: a.extraCost,
+    totalAmount: a.totalCost,
+    paymentMethod: a.paymentMethod,
+    paymentStatus: a.paymentStatus,
+    created: a.created
+  }));
+  DB.set('invoices', invoices);
+  DB.set('documents', []);
+  DB.set('logs', [
+    {id:'LOG001',userId:'U001',userName:'Dr. Vikram Raj',action:'System initialized',recordType:'System',recordId:'-',timestamp:new Date().toISOString()},
+  ]);
+  DB.set('seeded', ['done']);
+}
+
+function today() { return new Date().toISOString().split('T')[0]; }
+function now() { return new Date().toISOString(); }
+function fmt(d) { if(!d) return '-'; return new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); }
+function fmtDt(d) { if(!d) return '-'; return new Date(d).toLocaleString('en-IN'); }
+function uid(prefix) { return prefix+'-'+Date.now().toString(36).toUpperCase(); }
+
+// ──────────────────────────────────────────
+// AUTH
+// ──────────────────────────────────────────
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value.trim();
+  const r = document.getElementById('login-role').value;
+  const users = DB.get('users');
+  const user = users.find(x => x.username===u && x.password===p && x.role===r);
+  if (!user) { toast('Invalid credentials or role mismatch','error'); return; }
+  currentUser = user;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('user-name').textContent = user.name;
+  document.getElementById('user-role').textContent = user.role==='admin'?'Doctor · Admin':'Receptionist · Staff';
+  document.getElementById('user-avatar').textContent = user.name[0];
+  document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
+  buildNav();
+  logAction('User logged in','Auth',user.id);
+  if (user.role==='admin') showView('dashboard');
+  else showView('dash-staff');
+}
+function doLogout() {
+  logAction('User logged out','Auth',currentUser.id);
+  currentUser = null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+}
+
+// ──────────────────────────────────────────
+// NAV
+// ──────────────────────────────────────────
+const NAV_ADMIN = [
+  {label:'MAIN',items:[
+    {icon:'📊',label:'Dashboard',view:'dashboard'},
+    {icon:'👥',label:'Patients',view:'patients'},
+    {icon:'📅',label:'Appointments',view:'appointments'},
+    {icon:'🗓️',label:'Calendar',view:'calendar'},
+  ]},
+  {label:'FINANCE',items:[
+    {icon:'🧾',label:'Billing',view:'billing'},
+  ]},
+  {label:'ADMIN',items:[
+    {icon:'👤',label:'Staff',view:'staff'},
+    {icon:'📋',label:'Logs',view:'logs'},
+  ]}
+];
+const NAV_STAFF = [
+  {label:'MAIN',items:[
+    {icon:'🏠',label:'Dashboard',view:'dash-staff'},
+    {icon:'👥',label:'Patients',view:'patients'},
+    {icon:'📅',label:'Appointments',view:'appointments'},
+    {icon:'🗓️',label:'Calendar',view:'calendar'},
+  ]},
+  {label:'BILLING',items:[
+    {icon:'🧾',label:'Billing',view:'billing'},
+  ]}
+];
+function buildNav() {
+  const nav = document.getElementById('sidebar-nav');
+  const items = currentUser.role==='admin' ? NAV_ADMIN : NAV_STAFF;
+  nav.innerHTML = '';
+  items.forEach(section => {
+    nav.innerHTML += `<div class="nav-section-label">${section.label}</div>`;
+    section.items.forEach(item => {
+      nav.innerHTML += `<div class="nav-item" data-view="${item.view}" onclick="navClick('${item.view}')"><span class="nav-icon">${item.icon}</span>${item.label}</div>`;
+    });
+  });
+}
+function navClick(v) { showView(v); }
+function setActiveNav(v) {
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.view===v);
+  });
+}
+const PAGE_TITLES = {
+  'dashboard':'Dashboard','dash-staff':'Dashboard','patients':'Patient Registry',
+  'patient-profile':'Patient Profile','appointments':'Appointments','calendar':'Appointment Calendar',
+  'billing':'Billing & Invoices','staff':'Staff Management','logs':'System Logs'
+};
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('view-'+v);
+  if (el) el.classList.add('active');
+  document.getElementById('page-title').textContent = PAGE_TITLES[v]||v;
+  setActiveNav(v);
+  // Render
+  const renders = {
+    'dashboard': renderDashboard,
+    'dash-staff': renderStaffDash,
+    'patients': renderPatients,
+    'appointments': renderAppointments,
+    'calendar': renderCalendar,
+    'billing': renderBilling,
+    'staff': renderStaff,
+    'logs': renderLogs,
+  };
+  if (renders[v]) renders[v]();
+}
+
+// ──────────────────────────────────────────
+// DASHBOARD
+// ──────────────────────────────────────────
+function renderDashboard() {
+  const patients = DB.get('patients');
+  const appts = DB.get('appointments');
+  const invoices = DB.get('invoices');
+  const totalRev = invoices.filter(i=>i.paymentStatus==='Paid').reduce((s,i)=>s+i.totalAmount,0);
+  document.getElementById('admin-stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-icon teal">👥</div><div><div class="stat-value">${patients.length}</div><div class="stat-label">Total Patients</div></div></div>
+    <div class="stat-card"><div class="stat-icon blue">📅</div><div><div class="stat-value">${appts.length}</div><div class="stat-label">Total Appointments</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">🩺</div><div><div class="stat-value">${appts.filter(a=>a.visitType==='New Case').length}</div><div class="stat-label">New Cases</div></div></div>
+    <div class="stat-card"><div class="stat-icon yellow">💰</div><div><div class="stat-value">₹${totalRev.toLocaleString()}</div><div class="stat-label">Total Revenue</div></div></div>
+  `;
+  // Recent appointments
+  const tbody = document.getElementById('recent-appointments-body');
+  const recent = [...appts].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
+  tbody.innerHTML = recent.map(a => {
+    const p = getPatient(a.patientId);
+    return `<tr>
+      <td class="td-link" onclick="openPatientProfile('${a.patientId}')">${p?p.name:'Unknown'}</td>
+      <td>${fmt(a.date)}</td><td>${a.time}</td>
+      <td><span class="badge badge-${a.visitType==='New Case'?'info':'teal'}">${a.visitType}</span></td>
+      <td>₹${a.totalCost}</td>
+      <td><span class="badge badge-${a.paymentStatus==='Paid'?'success':'warning'}">${a.paymentStatus}</span></td>
+    </tr>`;
+  }).join('');
+  renderCharts(appts, invoices, patients);
+}
+
+function renderCharts(appts, invoices, patients) {
+  const cc = (id, type, data, opts={}) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (charts[id]) { charts[id].destroy(); }
+    charts[id] = new Chart(el, {type, data, options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#8896b0',font:{family:'Outfit',size:11}}}},
+      scales: type==='pie'||type==='doughnut' ? {} : {
+        x:{ticks:{color:'#8896b0',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'}},
+        y:{ticks:{color:'#8896b0',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'}}
+      },
+      ...opts
+    }});
+  };
+
+  // Trend last 7 days
+  const days = [...Array(7)].map((_,i)=>{
+    const d = new Date(); d.setDate(d.getDate()-6+i);
+    return d.toISOString().split('T')[0];
+  });
+  const apptCounts = days.map(d=>appts.filter(a=>a.date===d).length);
+  cc('chartApptTrend','bar',{
+    labels: days.map(d=>new Date(d).toLocaleDateString('en',{month:'short',day:'numeric'})),
+    datasets:[{label:'Appointments',data:apptCounts,backgroundColor:'rgba(0,201,167,0.5)',borderColor:'#00c9a7',borderWidth:2,borderRadius:4}]
+  });
+
+  // Revenue monthly
+  const months = [...Array(6)].map((_,i)=>{
+    const d = new Date(); d.setMonth(d.getMonth()-5+i);
+    return {key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,label:d.toLocaleDateString('en',{month:'short'})};
+  });
+  const revData = months.map(m=>invoices.filter(inv=>inv.paymentStatus==='Paid'&&inv.date.startsWith(m.key)).reduce((s,i)=>s+i.totalAmount,0));
+  cc('chartRevenue','line',{
+    labels: months.map(m=>m.label),
+    datasets:[{label:'Revenue (₹)',data:revData,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.1)',fill:true,tension:0.4,pointBackgroundColor:'#3b82f6'}]
+  });
+
+  // Visit type
+  const newCases = appts.filter(a=>a.visitType==='New Case').length;
+  const oldCases = appts.filter(a=>a.visitType==='Old Case').length;
+  cc('chartVisitType','doughnut',{
+    labels:['New Case','Old Case'],
+    datasets:[{data:[newCases,oldCases],backgroundColor:['rgba(59,130,246,0.8)','rgba(0,201,167,0.8)'],borderWidth:0}]
+  });
+
+  // Patient growth
+  const pgData = months.map(m=>patients.filter(p=>p.created&&p.created.startsWith(m.key)).length);
+  cc('chartPatients','bar',{
+    labels: months.map(m=>m.label),
+    datasets:[{label:'New Patients',data:pgData,backgroundColor:'rgba(245,158,11,0.5)',borderColor:'#f59e0b',borderWidth:2,borderRadius:4}]
+  });
+}
+
+function renderStaffDash() {
+  const patients = DB.get('patients');
+  const appts = DB.get('appointments');
+  const todayAppts = appts.filter(a=>a.date===today());
+  document.getElementById('staff-stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-icon teal">👥</div><div><div class="stat-value">${patients.length}</div><div class="stat-label">Total Patients</div></div></div>
+    <div class="stat-card"><div class="stat-icon blue">📅</div><div><div class="stat-value">${todayAppts.length}</div><div class="stat-label">Today's Appointments</div></div></div>
+    <div class="stat-card"><div class="stat-icon yellow">⏳</div><div><div class="stat-value">${todayAppts.filter(a=>a.paymentStatus==='Pending').length}</div><div class="stat-label">Pending Payments</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-value">${todayAppts.filter(a=>a.paymentStatus==='Paid').length}</div><div class="stat-label">Paid Today</div></div></div>
+  `;
+  const tbody = document.getElementById('today-appointments-body');
+  if (!todayAppts.length) { tbody.innerHTML=`<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">📅</div><div class="empty-state-text">No appointments today</div></div></td></tr>`; return; }
+  tbody.innerHTML = todayAppts.map(a=>{
+    const p = getPatient(a.patientId);
+    return `<tr>
+      <td class="td-link" onclick="openPatientProfile('${a.patientId}')">${p?p.name:'-'}</td>
+      <td>${a.time}</td>
+      <td><span class="badge badge-${a.visitType==='New Case'?'info':'teal'}">${a.visitType}</span></td>
+      <td>₹${a.totalCost}</td>
+      <td><span class="badge badge-${a.paymentStatus==='Paid'?'success':'warning'}">${a.paymentStatus}</span></td>
+      <td>
+        <button class="btn btn-sm btn-secondary" onclick="openEditAppt('${a.id}')">✏️</button>
+        ${a.paymentStatus==='Pending'?`<button class="btn btn-sm btn-primary" onclick="quickPay('${a.id}')">Pay</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ──────────────────────────────────────────
+// PATIENTS
+// ──────────────────────────────────────────
+function renderPatients(filter='') {
+  let patients = DB.get('patients');
+  const q = (filter||document.getElementById('patient-search')?.value||'').toLowerCase();
+  if (q) patients = patients.filter(p=>
+    p.name.toLowerCase().includes(q)||p.phone.includes(q)||p.id.toLowerCase().includes(q)
+  );
+  const tbody = document.getElementById('patients-body');
+  if (!patients.length) { tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">👥</div><div class="empty-state-text">No patients found</div></div></td></tr>`; return; }
+  tbody.innerHTML = patients.map(p=>`<tr>
+    <td class="td-mono">${p.id}</td>
+    <td class="td-link" onclick="openPatientProfile('${p.id}')">${p.name}</td>
+    <td>${p.phone}</td>
+    <td>${p.age}</td>
+    <td>${p.gender}</td>
+    <td>${fmt(p.created)}</td>
+    <td style="display:flex;gap:6px">
+      <button class="btn btn-sm btn-secondary" onclick="openPatientProfile('${p.id}')">View</button>
+      <button class="btn btn-sm btn-primary" onclick="prefillBookFromPatient('${p.id}')">+ Appt</button>
+    </td>
+  </tr>`).join('');
+}
+function filterPatients() { renderPatients(); }
+function getPatient(id) { return DB.get('patients').find(p=>p.id===id); }
+
+function openNewPatientModal() {
+  ['np-phone','np-name','np-address','np-age'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('np-gender').value='Male';
+  openModal('modal-patient');
+}
+function checkPatientPhone() {
+  const phone = document.getElementById('np-phone').value.trim();
+  if (!phone) { toast('Enter a phone number','error'); return; }
+  const p = DB.get('patients').find(x=>x.phone===phone);
+  if (p) {
+    toast(`Patient found: ${p.name} (${p.id})`,'info');
+    openPatientProfile(p.id);
+    closeModal('modal-patient');
+  } else {
+    toast('No existing patient. Fill form to create.','info');
+  }
+}
+function savePatient() {
+  const phone = document.getElementById('np-phone').value.trim();
+  const name = document.getElementById('np-name').value.trim();
+  if (!name || !phone) { toast('Name and phone are required','error'); return; }
+  const existing = DB.get('patients').find(p=>p.phone===phone);
+  if (existing) { toast(`Patient already exists: ${existing.id}`,'error'); return; }
+  const patients = DB.get('patients');
+  const num = String(patients.length+1).padStart(5,'0');
+  const patient = {
+    id: `VRP-${num}`,
+    name,
+    phone,
+    address: document.getElementById('np-address').value.trim(),
+    age: document.getElementById('np-age').value,
+    gender: document.getElementById('np-gender').value,
+    created: today()
+  };
+  patients.push(patient);
+  DB.set('patients', patients);
+  logAction('Patient created','Patient',patient.id);
+  toast(`Patient ${patient.id} created`,'success');
+  closeModal('modal-patient');
+  renderPatients();
+}
+
+// ──────────────────────────────────────────
+// PATIENT PROFILE
+// ──────────────────────────────────────────
+function openPatientProfile(pid) {
+  currentPatientId = pid;
+  const p = getPatient(pid);
+  if (!p) return;
+  // Header
+  document.getElementById('profile-header').innerHTML = `
+    <div class="profile-avatar">${p.name[0]}</div>
+    <div style="flex:1">
+      <div class="profile-name">${p.name}</div>
+      <div class="profile-id">${p.id}</div>
+      <div class="profile-meta">
+        <div class="profile-meta-item">📱 ${p.phone}</div>
+        <div class="profile-meta-item">🎂 ${p.age} yrs</div>
+        <div class="profile-meta-item">${p.gender==='Male'?'👨':'👩'} ${p.gender}</div>
+        <div class="profile-meta-item">📍 ${p.address||'—'}</div>
+        <div class="profile-meta-item">📆 Registered ${fmt(p.created)}</div>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="prefillBookFromPatient('${p.id}')">+ Book Appointment</button>
+  `;
+  // Activate first tab
+  document.querySelectorAll('.profile-tab').forEach((t,i)=>t.classList.toggle('active',i===0));
+  document.querySelectorAll('.profile-panel').forEach((p,i)=>p.classList.toggle('active',i===0));
+  renderProfileDetails(p);
+  renderProfileAppts(pid);
+  renderProfilePayments(pid);
+  renderProfileDocs(pid);
+  showView('patient-profile');
+}
+function switchProfileTab(tab, el) {
+  document.querySelectorAll('.profile-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const panels = {details:'panel-details',appts:'panel-appts',payments:'panel-payments',docs:'panel-docs'};
+  document.querySelectorAll('.profile-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(panels[tab]).classList.add('active');
+}
+function renderProfileDetails(p) {
+  document.getElementById('panel-details').innerHTML = `
+    <div class="table-card" style="padding:20px">
+      <div class="section-title">Personal Information</div>
+      <div class="form-grid" style="gap:12px;pointer-events:none">
+        ${detailRow('Patient ID',p.id,true)}
+        ${detailRow('Full Name',p.name)}
+        ${detailRow('Phone',p.phone)}
+        ${detailRow('Age',p.age+' years')}
+        ${detailRow('Gender',p.gender)}
+        ${detailRow('Address',p.address||'—')}
+        ${detailRow('Registered',fmt(p.created))}
+      </div>
+    </div>
+  `;
+}
+function detailRow(label, val, mono=false) {
+  return `<div><div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">${label}</div><div style="font-size:14px;font-weight:500;${mono?'font-family:var(--mono);color:var(--accent)':''}">${val||'—'}</div></div>`;
+}
+function renderProfileAppts(pid) {
+  const appts = DB.get('appointments').filter(a=>a.patientId===pid);
+  const el = document.getElementById('panel-appts');
+  if (!appts.length) { el.innerHTML=emptyState('📅','No appointments yet'); return; }
+  el.innerHTML = `<div class="table-card"><div class="table-wrap"><table>
+    <thead><tr><th>Date</th><th>Time</th><th>Visit</th><th>Base</th><th>Extra</th><th>Total</th><th>Method</th><th>Status</th></tr></thead>
+    <tbody>${appts.map(a=>`<tr>
+      <td>${fmt(a.date)}</td><td>${a.time}</td>
+      <td><span class="badge badge-${a.visitType==='New Case'?'info':'teal'}">${a.visitType}</span></td>
+      <td>₹${a.baseCost}</td><td>₹${a.extraCost}</td><td><strong>₹${a.totalCost}</strong></td>
+      <td>${a.paymentMethod||'—'}</td>
+      <td><span class="badge badge-${a.paymentStatus==='Paid'?'success':'warning'}">${a.paymentStatus}</span></td>
+    </tr>`).join('')}</tbody>
+  </table></div></div>`;
+}
+function renderProfilePayments(pid) {
+  const appts = DB.get('appointments').filter(a=>a.patientId===pid && a.paymentStatus==='Paid');
+  const el = document.getElementById('panel-payments');
+  if (!appts.length) { el.innerHTML=emptyState('💳','No payments yet'); return; }
+  el.innerHTML = `<div class="table-card"><div class="table-wrap"><table>
+    <thead><tr><th>Appt ID</th><th>Base</th><th>Extra</th><th>Total Paid</th><th>Method</th><th>Date</th></tr></thead>
+    <tbody>${appts.map(a=>`<tr>
+      <td class="td-mono">${a.id}</td><td>₹${a.baseCost}</td><td>₹${a.extraCost}</td>
+      <td><strong>₹${a.totalCost}</strong></td><td>${a.paymentMethod||'—'}</td><td>${fmt(a.date)}</td>
+    </tr>`).join('')}</tbody>
+  </table></div></div>`;
+}
+function renderProfileDocs(pid) {
+  const docs = DB.get('documents').filter(d=>d.patientId===pid);
+  const el = document.getElementById('panel-docs');
+  const uploadBtn = `<div style="margin-bottom:16px"><button class="btn btn-primary btn-sm" onclick="openDocUpload('${pid}')">+ Upload Document</button></div>`;
+  if (!docs.length) { el.innerHTML=uploadBtn+emptyState('📄','No documents uploaded'); return; }
+  const icons = {'Prescription Scan':'💊','Lab Report':'🔬','Medical Record':'📋','Other':'📄'};
+  el.innerHTML = uploadBtn+`<div class="docs-grid">${docs.map(d=>`
+    <div class="doc-card">
+      <div class="doc-icon">${icons[d.type]||'📄'}</div>
+      <div class="doc-name">${d.name}</div>
+      <div class="doc-meta">${d.type}</div>
+      <div class="doc-meta">${fmt(d.date)}</div>
+    </div>`).join('')}</div>`;
+}
+function emptyState(icon, text) {
+  return `<div class="empty-state"><div class="empty-state-icon">${icon}</div><div class="empty-state-text">${text}</div></div>`;
+}
+
+// ──────────────────────────────────────────
+// APPOINTMENTS
+// ──────────────────────────────────────────
+function renderAppointments() {
+  let appts = DB.get('appointments');
+  const q = (document.getElementById('appt-search')?.value||'').toLowerCase();
+  const sf = document.getElementById('appt-status-filter')?.value||'';
+  if (q) appts = appts.filter(a=>{
+    const p = getPatient(a.patientId);
+    return (p&&p.name.toLowerCase().includes(q))||a.id.toLowerCase().includes(q);
+  });
+  if (sf) appts = appts.filter(a=>a.paymentStatus===sf);
+  appts.sort((a,b)=>b.date.localeCompare(a.date));
+  const tbody = document.getElementById('appointments-body');
+  if (!appts.length) { tbody.innerHTML=`<tr><td colspan="9">${emptyState('📅','No appointments found')}</td></tr>`; return; }
+  tbody.innerHTML = appts.map(a=>{
+    const p = getPatient(a.patientId);
+    return `<tr>
+      <td class="td-mono" style="font-size:11px">${a.id}</td>
+      <td class="td-link" onclick="openPatientProfile('${a.patientId}')">${p?p.name:'Unknown'}</td>
+      <td>${fmt(a.date)}</td><td>${a.time}</td>
+      <td><span class="badge badge-${a.visitType==='New Case'?'info':'teal'}">${a.visitType}</span></td>
+      <td>₹${a.totalCost}</td>
+      <td>${a.paymentMethod||'—'}</td>
+      <td><span class="badge badge-${a.paymentStatus==='Paid'?'success':'warning'}">${a.paymentStatus}</span></td>
+      <td style="display:flex;gap:4px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-secondary" onclick="openEditAppt('${a.id}')">✏️</button>
+        <button class="btn btn-sm btn-secondary" onclick="viewInvoice('${a.id}')">🧾</button>
+        <button class="btn btn-sm btn-danger" onclick="confirmDelete('${a.id}')">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function filterAppointments() { renderAppointments(); }
+
+function openBookModal(prefillPatientId=null) {
+  editingApptId = null;
+  document.getElementById('book-modal-title').textContent = 'Book Appointment';
+  document.getElementById('save-appt-btn').textContent = 'Book Appointment';
+  document.getElementById('appt-date').value = today();
+  document.getElementById('appt-visit').value = 'Old Case';
+  document.getElementById('appt-base-cost').value = '500';
+  document.getElementById('appt-extra-toggle').value = 'No';
+  document.getElementById('appt-extra-cost').value = '0';
+  document.getElementById('extra-cost-field').style.display = 'none';
+  document.getElementById('appt-payment-method').value = '';
+  document.getElementById('appt-paid-status').value = 'Pending';
+  document.getElementById('appt-notes').value = '';
+  document.getElementById('appt-patient-search').value = '';
+  document.getElementById('appt-patient-id').value = '';
+  document.getElementById('appt-patient-dropdown').style.display = 'none';
+  if (prefillPatientId) {
+    const p = getPatient(prefillPatientId);
+    if (p) {
+      document.getElementById('appt-patient-search').value = `${p.name} (${p.id})`;
+      document.getElementById('appt-patient-id').value = p.id;
+    }
+  }
+  updateApptTotal();
+  openModal('modal-book');
+}
+function prefillBookFromPatient(pid) {
+  openBookModal(pid);
+}
+function openEditAppt(id) {
+  const appts = DB.get('appointments');
+  const a = appts.find(x=>x.id===id);
+  if (!a) return;
+  editingApptId = id;
+  document.getElementById('book-modal-title').textContent = 'Edit Appointment';
+  document.getElementById('save-appt-btn').textContent = 'Save Changes';
+  const p = getPatient(a.patientId);
+  document.getElementById('appt-patient-search').value = p?`${p.name} (${p.id})`:'';
+  document.getElementById('appt-patient-id').value = a.patientId;
+  document.getElementById('appt-date').value = a.date;
+  document.getElementById('appt-time').value = a.time;
+  document.getElementById('appt-visit').value = a.visitType;
+  document.getElementById('appt-base-cost').value = a.baseCost;
+  document.getElementById('appt-extra-toggle').value = a.extraCostIncluded;
+  document.getElementById('appt-extra-cost').value = a.extraCost||0;
+  document.getElementById('extra-cost-field').style.display = a.extraCostIncluded==='Yes'?'block':'none';
+  document.getElementById('appt-payment-method').value = a.paymentMethod||'';
+  document.getElementById('appt-paid-status').value = a.paymentStatus;
+  document.getElementById('appt-notes').value = a.notes||'';
+  updateApptTotal();
+  openModal('modal-book');
+}
+function toggleExtraCost() {
+  const v = document.getElementById('appt-extra-toggle').value;
+  document.getElementById('extra-cost-field').style.display = v==='Yes'?'block':'none';
+  updateApptTotal();
+}
+function updateApptTotal() {
+  const base = parseFloat(document.getElementById('appt-base-cost').value)||0;
+  const extra = document.getElementById('appt-extra-toggle').value==='Yes'?(parseFloat(document.getElementById('appt-extra-cost').value)||0):0;
+  document.getElementById('appt-total-display').textContent = `₹${base+extra}`;
+}
+function saveAppointment() {
+  const patientId = document.getElementById('appt-patient-id').value;
+  const date = document.getElementById('appt-date').value;
+  const time = document.getElementById('appt-time').value;
+  if (!patientId) { toast('Please select a patient','error'); return; }
+  if (!date) { toast('Please select a date','error'); return; }
+  const appts = DB.get('appointments');
+  // Conflict check
+  if (!editingApptId) {
+    const conflict = appts.find(a=>a.date===date&&a.time===time&&a.id!==editingApptId);
+    if (conflict) { toast('This time slot is already booked!','error'); return; }
+  }
+  const base = parseFloat(document.getElementById('appt-base-cost').value)||0;
+  const extraToggle = document.getElementById('appt-extra-toggle').value;
+  const extra = extraToggle==='Yes'?(parseFloat(document.getElementById('appt-extra-cost').value)||0):0;
+  const total = base+extra;
+  const visitType = document.getElementById('appt-visit').value;
+  const paymentMethod = document.getElementById('appt-payment-method').value;
+  const paymentStatus = document.getElementById('appt-paid-status').value;
+  if (editingApptId) {
+    const idx = appts.findIndex(a=>a.id===editingApptId);
+    Object.assign(appts[idx],{patientId,date,time:document.getElementById('appt-time').value,visitType,baseCost:base,extraCostIncluded:extraToggle,extraCost:extra,totalCost:total,paymentMethod,paymentStatus,notes:document.getElementById('appt-notes').value});
+    DB.set('appointments',appts);
+    // Sync invoice
+    const invs = DB.get('invoices');
+    const ii = invs.findIndex(i=>i.appointmentId===editingApptId);
+    if (ii>-1) { Object.assign(invs[ii],{date,visitType,baseCost:base,extraCost:extra,totalAmount:total,paymentMethod,paymentStatus}); DB.set('invoices',invs); }
+    logAction('Appointment modified','Appointment',editingApptId);
+    toast('Appointment updated','success');
+  } else {
+    const newId = `APT-${String(appts.length+1).padStart(4,'0')}`;
+    const appt = {id:newId,patientId,date,time:document.getElementById('appt-time').value,visitType,baseCost:base,extraCostIncluded:extraToggle,extraCost:extra,totalCost:total,paymentMethod,paymentStatus,notes:document.getElementById('appt-notes').value,created:today()};
+    appts.push(appt);
+    DB.set('appointments',appts);
+    // Create invoice
+    const invs = DB.get('invoices');
+    const invId = `INV-${String(invs.length+1).padStart(4,'0')}`;
+    invs.push({id:invId,appointmentId:newId,patientId,date,visitType,baseCost:base,extraCost:extra,totalAmount:total,paymentMethod,paymentStatus,created:today()});
+    DB.set('invoices',invs);
+    logAction('Appointment booked','Appointment',newId);
+    logAction('Invoice generated','Invoice',invId);
+    toast(`Appointment ${newId} booked`,'success');
+  }
+  closeModal('modal-book');
+  renderAppointments();
+}
+function confirmDelete(id) {
+  document.getElementById('confirm-message').textContent = `Delete appointment ${id}? This cannot be undone.`;
+  document.getElementById('confirm-action-btn').onclick = () => deleteAppt(id);
+  openModal('modal-confirm');
+}
+function deleteAppt(id) {
+  let appts = DB.get('appointments').filter(a=>a.id!==id);
+  DB.set('appointments',appts);
+  let invs = DB.get('invoices').filter(i=>i.appointmentId!==id);
+  DB.set('invoices',invs);
+  logAction('Appointment deleted','Appointment',id);
+  toast('Appointment deleted','info');
+  closeModal('modal-confirm');
+  renderAppointments();
+}
+function quickPay(apptId) {
+  const appts = DB.get('appointments');
+  const idx = appts.findIndex(a=>a.id===apptId);
+  if (idx<0) return;
+  appts[idx].paymentStatus = 'Paid';
+  appts[idx].paymentMethod = appts[idx].paymentMethod || 'Cash';
+  DB.set('appointments',appts);
+  const invs = DB.get('invoices');
+  const ii = invs.findIndex(i=>i.appointmentId===apptId);
+  if (ii>-1) { invs[ii].paymentStatus='Paid'; invs[ii].paymentMethod=appts[idx].paymentMethod; DB.set('invoices',invs); }
+  logAction('Payment marked as paid','Invoice',apptId);
+  toast('Payment marked as Paid','success');
+  renderStaffDash();
+}
+
+// ──────────────────────────────────────────
+// PATIENT SEARCH FOR APPT
+// ──────────────────────────────────────────
+function searchPatientsForAppt() {
+  const q = document.getElementById('appt-patient-search').value.toLowerCase();
+  const dd = document.getElementById('appt-patient-dropdown');
+  if (!q) { dd.style.display='none'; return; }
+  const results = DB.get('patients').filter(p=>
+    p.name.toLowerCase().includes(q)||p.phone.includes(q)||p.id.toLowerCase().includes(q)
+  ).slice(0,8);
+  if (!results.length) { dd.innerHTML=`<div style="padding:10px 14px;font-size:13px;color:var(--text-muted)">No patients found</div>`; dd.style.display='block'; return; }
+  dd.innerHTML = results.map(p=>`
+    <div onclick="selectApptPatient('${p.id}')" style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);transition:background .15s" onmouseover="this.style.background='var(--bg-elevated)'" onmouseout="this.style.background=''">
+      <strong>${p.name}</strong> <span style="color:var(--text-muted)">${p.id} · ${p.phone}</span>
+    </div>`).join('');
+  dd.style.display='block';
+}
+function selectApptPatient(id) {
+  const p = getPatient(id);
+  if (!p) return;
+  document.getElementById('appt-patient-search').value = `${p.name} (${p.id})`;
+  document.getElementById('appt-patient-id').value = id;
+  document.getElementById('appt-patient-dropdown').style.display='none';
+}
+document.addEventListener('click', e=>{
+  const dd = document.getElementById('appt-patient-dropdown');
+  if (dd&&!dd.contains(e.target)&&e.target.id!=='appt-patient-search') dd.style.display='none';
+});
+
+// ──────────────────────────────────────────
+// CALENDAR
+// ──────────────────────────────────────────
+function renderCalendar() {
+  const appts = DB.get('appointments');
+  const year = calDate.getFullYear();
+  const month = calDate.getMonth();
+  document.getElementById('cal-month-label').textContent = calDate.toLocaleDateString('en',{month:'long',year:'numeric'});
+  const grid = document.getElementById('cal-grid');
+  // Keep day headers
+  const dayHeaders = grid.querySelectorAll('.cal-day-name');
+  grid.innerHTML = '';
+  dayHeaders.forEach(h=>grid.appendChild(h.cloneNode(true)));
+  const firstDay = new Date(year,month,1).getDay();
+  const daysInMonth = new Date(year,month+1,0).getDate();
+  const prevDays = new Date(year,month,0).getDate();
+  // Prev month
+  for (let i=firstDay-1;i>=0;i--) {
+    const cell = document.createElement('div');
+    cell.className='cal-cell other-month';
+    cell.innerHTML=`<div class="cal-date">${prevDays-i}</div>`;
+    grid.appendChild(cell);
+  }
+  const todayStr = today();
+  for (let d=1;d<=daysInMonth;d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayAppts = appts.filter(a=>a.date===dateStr);
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell'+(dateStr===todayStr?' today':'');
+    cell.innerHTML = `<div class="cal-date">${d}</div>${dayAppts.slice(0,3).map(a=>{
+      const p=getPatient(a.patientId);
+      return `<div class="cal-event">${a.time} · ${p?p.name.split(' ')[0]:'?'}</div>`;
+    }).join('')}${dayAppts.length>3?`<div style="font-size:9px;color:var(--text-muted)">+${dayAppts.length-3} more</div>`:''}`;
+    grid.appendChild(cell);
+  }
+  // Next month
+  const remaining = 42-(firstDay+daysInMonth);
+  for (let d=1;d<=remaining;d++) {
+    const cell = document.createElement('div');
+    cell.className='cal-cell other-month';
+    cell.innerHTML=`<div class="cal-date">${d}</div>`;
+    grid.appendChild(cell);
+  }
+}
+function calNav(dir) {
+  calDate.setMonth(calDate.getMonth()+dir);
+  renderCalendar();
+}
+
+// ──────────────────────────────────────────
+// BILLING
+// ──────────────────────────────────────────
+function renderBilling() {
+  let invs = DB.get('invoices');
+  const filter = document.getElementById('billing-filter')?.value||'all';
+  const q = (document.getElementById('billing-search')?.value||'').toLowerCase();
+  if (filter==='today') invs = invs.filter(i=>i.date===today());
+  if (filter==='pending') invs = invs.filter(i=>i.paymentStatus==='Pending');
+  if (filter==='paid') invs = invs.filter(i=>i.paymentStatus==='Paid');
+  if (q) invs = invs.filter(i=>{
+    const p=getPatient(i.patientId);
+    return (p&&p.name.toLowerCase().includes(q))||i.id.toLowerCase().includes(q);
+  });
+  invs.sort((a,b)=>b.date.localeCompare(a.date));
+  const tbody = document.getElementById('billing-body');
+  if (!invs.length) { tbody.innerHTML=`<tr><td colspan="10">${emptyState('🧾','No invoices found')}</td></tr>`; return; }
+  tbody.innerHTML = invs.map(inv=>{
+    const p=getPatient(inv.patientId);
+    return `<tr>
+      <td class="td-mono" style="font-size:11px">${inv.id}</td>
+      <td class="td-link" onclick="openPatientProfile('${inv.patientId}')">${p?p.name:'Unknown'}</td>
+      <td>${fmt(inv.date)}</td>
+      <td><span class="badge badge-${inv.visitType==='New Case'?'info':'teal'}">${inv.visitType}</span></td>
+      <td>₹${inv.baseCost}</td><td>₹${inv.extraCost}</td>
+      <td><strong>₹${inv.totalAmount}</strong></td>
+      <td>${inv.paymentMethod||'—'}</td>
+      <td><span class="badge badge-${inv.paymentStatus==='Paid'?'success':'warning'}">${inv.paymentStatus}</span></td>
+      <td style="display:flex;gap:4px">
+        <button class="btn btn-sm btn-secondary" onclick="viewInvoiceById('${inv.id}')">View</button>
+        ${inv.paymentStatus==='Pending'?`<button class="btn btn-sm btn-primary" onclick="viewInvoiceById('${inv.id}',true)">Pay</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+function filterBilling() { renderBilling(); }
+
+function viewInvoice(apptId) {
+  const inv = DB.get('invoices').find(i=>i.appointmentId===apptId);
+  if (!inv) { toast('Invoice not found','error'); return; }
+  viewInvoiceById(inv.id);
+}
+function viewInvoiceById(invId, showPay=false) {
+  currentInvoiceId = invId;
+  const inv = DB.get('invoices').find(i=>i.id===invId);
+  if (!inv) return;
+  const p = getPatient(inv.patientId);
+  const paySection = document.getElementById('invoice-pay-section');
+  paySection.style.display = (showPay&&inv.paymentStatus==='Pending') ? 'block':'none';
+  document.getElementById('invoice-content').innerHTML = buildInvoiceHTML(inv,p);
+  openModal('modal-invoice');
+}
+function buildInvoiceHTML(inv,p) {
+  return `<div class="invoice-print" id="printable-invoice">
+    <div class="invoice-header">
+      <div>
+        <h1>VR Health<span class="inv-accent">OS</span></h1>
+        <div style="font-size:13px;color:#666;margin-top:4px">Clinic Management System</div>
+        <div style="font-size:12px;color:#999;margin-top:2px">123, Medical Complex, Healthcare Nagar</div>
+      </div>
+      <div class="invoice-meta">
+        <table>
+          <tr><td>Invoice No</td><td><strong>${inv.id}</strong></td></tr>
+          <tr><td>Date</td><td>${fmt(inv.date)}</td></tr>
+          <tr><td>Status</td><td><span class="status-stamp ${inv.paymentStatus==='Paid'?'stamp-paid':'stamp-pending'}">${inv.paymentStatus}</span></td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="invoice-divider"></div>
+    <div style="display:flex;justify-content:space-between;font-size:13px">
+      <div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#999;margin-bottom:8px">Bill To</div>
+        <div style="font-weight:700;font-size:16px">${p?p.name:'—'}</div>
+        <div style="color:#666;margin-top:2px">ID: ${p?p.id:'—'}</div>
+        <div style="color:#666">📱 ${p?p.phone:'—'}</div>
+        <div style="color:#666">📍 ${p&&p.address?p.address:'—'}</div>
+      </div>
+      <div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#999;margin-bottom:8px">Appointment</div>
+        <div>Visit Type: <strong>${inv.visitType}</strong></div>
+        <div>Appt ID: <strong>${inv.appointmentId}</strong></div>
+        <div>Method: <strong>${inv.paymentMethod||'Not Set'}</strong></div>
+      </div>
+    </div>
+    <table class="invoice-table">
+      <thead><tr><th>Description</th><th style="text-align:right">Amount</th></tr></thead>
+      <tbody>
+        <tr><td>Consultation Fee (${inv.visitType})</td><td style="text-align:right">₹${inv.baseCost}</td></tr>
+        ${inv.extraCost>0?`<tr><td>Additional Charges</td><td style="text-align:right">₹${inv.extraCost}</td></tr>`:''}
+      </tbody>
+    </table>
+    <div class="invoice-total">
+      <div class="total-row"><span>Subtotal</span><span>₹${inv.baseCost+inv.extraCost}</span></div>
+      <div class="total-row"><span>Tax (0%)</span><span>₹0</span></div>
+      <div class="grand-total total-row"><span>Total Amount</span><span>₹${inv.totalAmount}</span></div>
+    </div>
+    <div class="invoice-footer">
+      <div>Thank you for trusting us with your health.</div>
+      <div>Generated by VR HealthOS • This is a computer-generated invoice</div>
+    </div>
+  </div>`;
+}
+function markInvoicePaid() {
+  const method = document.getElementById('pay-method-select').value;
+  const invs = DB.get('invoices');
+  const idx = invs.findIndex(i=>i.id===currentInvoiceId);
+  if (idx<0) return;
+  invs[idx].paymentStatus='Paid';
+  invs[idx].paymentMethod=method;
+  DB.set('invoices',invs);
+  // Sync appointment
+  const appts = DB.get('appointments');
+  const ai = appts.findIndex(a=>a.id===invs[idx].appointmentId);
+  if (ai>-1) { appts[ai].paymentStatus='Paid'; appts[ai].paymentMethod=method; DB.set('appointments',appts); }
+  logAction('Payment marked as paid','Invoice',currentInvoiceId);
+  toast('Invoice marked as Paid','success');
+  closeModal('modal-invoice');
+  renderBilling();
+}
+function downloadInvoice() {
+  const inv = DB.get('invoices').find(i=>i.id===currentInvoiceId);
+  const p = getPatient(inv?.patientId);
+  if (!inv||!p) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'mm', format:'a4' });
+  const el = document.getElementById('printable-invoice');
+  if (el) {
+    doc.setFontSize(20); doc.setTextColor(10,14,26);
+    doc.text('VR HealthOS', 20, 20);
+    doc.setFontSize(10); doc.setTextColor(100);
+    doc.text('Clinic Management System', 20, 28);
+    doc.text('123, Medical Complex, Healthcare Nagar', 20, 34);
+    doc.setDrawColor(0,201,167); doc.setLineWidth(0.5); doc.line(20,38,190,38);
+    doc.setFontSize(11); doc.setTextColor(10,14,26);
+    doc.text(`Invoice No: ${inv.id}`, 130, 48);
+    doc.text(`Date: ${fmt(inv.date)}`, 130, 55);
+    doc.text(`Status: ${inv.paymentStatus}`, 130, 62);
+    doc.text('Bill To:', 20, 48);
+    doc.setFontSize(13); doc.setFont(undefined,'bold');
+    doc.text(p.name, 20, 56);
+    doc.setFont(undefined,'normal'); doc.setFontSize(10);
+    doc.text(`ID: ${p.id}`, 20, 63);
+    doc.text(`Phone: ${p.phone}`, 20, 70);
+    doc.line(20,78,190,78);
+    doc.setFontSize(10); doc.setTextColor(100);
+    doc.text('DESCRIPTION', 20, 88);
+    doc.text('AMOUNT', 170, 88);
+    doc.setTextColor(10,14,26);
+    doc.text(`Consultation Fee (${inv.visitType})`, 20, 98);
+    doc.text(`Rs. ${inv.baseCost}`, 170, 98);
+    if (inv.extraCost>0) { doc.text('Additional Charges', 20, 108); doc.text(`Rs. ${inv.extraCost}`, 170, 108); }
+    doc.line(20,115,190,115);
+    doc.setFontSize(12); doc.setFont(undefined,'bold');
+    doc.setTextColor(0,201,167);
+    doc.text(`Total: Rs. ${inv.totalAmount}`, 150, 125);
+    doc.setFont(undefined,'normal'); doc.setFontSize(9); doc.setTextColor(150);
+    doc.text('Thank you for trusting us with your health.', 20, 145);
+    doc.text('Generated by VR HealthOS — Computer Generated Invoice', 20, 152);
+    doc.save(`${inv.id}_${p.name}.pdf`);
+    toast('PDF downloaded','success');
+  }
+}
+
+// ──────────────────────────────────────────
+// DOCUMENTS
+// ──────────────────────────────────────────
+function openDocUpload(pid) {
+  currentPatientId = pid;
+  document.getElementById('doc-name').value='';
+  document.getElementById('doc-file').value='';
+  openModal('modal-upload-doc');
+}
+function saveDocument() {
+  const name = document.getElementById('doc-name').value.trim();
+  const type = document.getElementById('doc-type').value;
+  const file = document.getElementById('doc-file').files[0];
+  if (!name) { toast('Enter document name','error'); return; }
+  const docs = DB.get('documents');
+  const doc = {id:uid('DOC'),patientId:currentPatientId,name:name||file?.name||'Document',type,date:today(),fileName:file?.name||''};
+  docs.push(doc);
+  DB.set('documents',docs);
+  logAction('Document uploaded','Document',doc.id);
+  toast('Document uploaded','success');
+  closeModal('modal-upload-doc');
+  renderProfileDocs(currentPatientId);
+}
+
+// ──────────────────────────────────────────
+// STAFF
+// ──────────────────────────────────────────
+function renderStaff() {
+  const users = DB.get('users');
+  const tbody = document.getElementById('staff-body');
+  tbody.innerHTML = users.map(u=>`<tr>
+    <td class="td-mono">${u.id}</td>
+    <td>${u.name}</td>
+    <td style="font-family:var(--mono);font-size:12px">${u.username}</td>
+    <td><span class="badge badge-${u.role==='admin'?'info':'teal'}">${u.role==='admin'?'Doctor · Admin':'Receptionist'}</span></td>
+    <td>${fmt(u.created)}</td>
+    <td>${u.id!=='U001'?`<button class="btn btn-sm btn-danger" onclick="deleteStaff('${u.id}')">Delete</button>`:'<span style="color:var(--text-muted);font-size:12px">Protected</span>'}</td>
+  </tr>`).join('');
+}
+function openAddStaffModal() {
+  ['staff-name','staff-username','staff-password'].forEach(id=>document.getElementById(id).value='');
+  openModal('modal-staff');
+}
+function saveStaff() {
+  const name = document.getElementById('staff-name').value.trim();
+  const username = document.getElementById('staff-username').value.trim();
+  const password = document.getElementById('staff-password').value.trim();
+  const role = document.getElementById('staff-role').value;
+  if (!name||!username||!password) { toast('All fields required','error'); return; }
+  const users = DB.get('users');
+  if (users.find(u=>u.username===username)) { toast('Username already exists','error'); return; }
+  const u = {id:`U${String(users.length+1).padStart(3,'0')}`,name,username,password,role,created:today()};
+  users.push(u);
+  DB.set('users',users);
+  logAction('Staff created','User',u.id);
+  toast('Staff member added','success');
+  closeModal('modal-staff');
+  renderStaff();
+}
+function deleteStaff(id) {
+  let users = DB.get('users').filter(u=>u.id!==id);
+  DB.set('users',users);
+  logAction('Staff deleted','User',id);
+  toast('Staff removed','info');
+  renderStaff();
+}
+
+// ──────────────────────────────────────────
+// LOGS
+// ──────────────────────────────────────────
+function logAction(action, recordType, recordId) {
+  if (!currentUser) return;
+  const logs = DB.get('logs');
+  logs.unshift({id:uid('LOG'),userId:currentUser.id,userName:currentUser.name,action,recordType,recordId,timestamp:new Date().toISOString()});
+  if (logs.length>200) logs.pop();
+  DB.set('logs',logs);
+}
+function renderLogs() {
+  let logs = DB.get('logs');
+  const q = (document.getElementById('log-search')?.value||'').toLowerCase();
+  if (q) logs = logs.filter(l=>l.action.toLowerCase().includes(q)||l.userName.toLowerCase().includes(q)||l.recordType.toLowerCase().includes(q));
+  const tbody = document.getElementById('logs-body');
+  if (!logs.length) { tbody.innerHTML=`<tr><td colspan="5">${emptyState('📋','No logs yet')}</td></tr>`; return; }
+  tbody.innerHTML = logs.map(l=>`<tr>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--text-muted)">${fmtDt(l.timestamp)}</td>
+    <td><strong>${l.userName}</strong></td>
+    <td>${l.action}</td>
+    <td><span class="badge badge-info">${l.recordType}</span></td>
+    <td class="td-mono" style="font-size:11px">${l.recordId}</td>
+  </tr>`).join('');
+}
+function filterLogs() { renderLogs(); }
+
+// ──────────────────────────────────────────
+// MODAL HELPERS
+// ──────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',e=>{ if (e.target===m) m.classList.remove('open'); });
+});
+
+// ──────────────────────────────────────────
+// TOAST
+// ──────────────────────────────────────────
+function toast(msg, type='success') {
+  const icons = {success:'✓',error:'✕',info:'ℹ'};
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${icons[type]||'•'}</span><span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>el.remove(),3000);
+}
+
+// ──────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────
+seedData();
+document.getElementById('appt-base-cost').addEventListener('input',updateApptTotal);
+</script>
+</body>
+</html>
